@@ -19,7 +19,11 @@ func newDreamhostClient(client *dreamhostapi.Client) *cachedDreamhostClient {
 }
 
 func (c *cachedDreamhostClient) AddDNSRecord(ctx context.Context, recordInput dreamhostapi.DNSRecordInput) error {
-	return c.client.AddDNSRecord(ctx, recordInput)
+	err := c.client.AddDNSRecord(ctx, recordInput)
+	if err == nil {
+		c.cache.Invalidate()
+	}
+	return err
 }
 
 func (c *cachedDreamhostClient) GetDNSRecord(
@@ -56,5 +60,9 @@ func (c *cachedDreamhostClient) ListDNSRecords(ctx context.Context) ([]dreamhost
 }
 
 func (c *cachedDreamhostClient) RemoveDNSRecord(ctx context.Context, recordInput dreamhostapi.DNSRecordInput) error {
-	return c.client.RemoveDNSRecord(ctx, recordInput)
+	err := c.client.RemoveDNSRecord(ctx, recordInput)
+	if err == nil {
+		c.cache.Invalidate()
+	}
+	return err
 }

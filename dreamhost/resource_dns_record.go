@@ -8,6 +8,7 @@ import (
 	dreamhostapi "github.com/adamantal/go-dreamhost/api"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/pkg/errors"
 )
 
@@ -35,11 +36,13 @@ func resourceDNSRecord() *schema.Resource {
 				Description: "the value of the DNS record",
 			},
 			"type": {
-				// TODO(adamantal): add validatation for DNS record types
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "the type of the DNS record (e.g. A, CNAME, TXT)",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"A", "AAAA", "CNAME", "MX", "NS", "PTR", "TXT", "SRV", "NAPTR",
+				}, false),
+				Description: "the type of the DNS record (e.g. A, AAAA, CNAME, MX, NS, PTR, TXT, SRV, NAPTR)",
 			},
 
 			// computed values
@@ -161,24 +164,24 @@ func refreshDataFromRecord(data *schema.ResourceData, record dreamhostapi.DNSRec
 		return errors.Wrap(err, "failed to set field `record`")
 	}
 	if err := data.Set("value", record.Value); err != nil {
-		return errors.Wrap(err, "failed to set field `record`")
+		return errors.Wrap(err, "failed to set field `value`")
 	}
 	if err := data.Set("type", record.Type); err != nil {
-		return errors.Wrap(err, "failed to set field `record`")
+		return errors.Wrap(err, "failed to set field `type`")
 	}
 
 	// computed values
 	if err := data.Set("comment", record.Comment); err != nil {
-		return errors.Wrap(err, "failed to set field `record`")
+		return errors.Wrap(err, "failed to set field `comment`")
 	}
 	if err := data.Set("account_id", record.AccountID); err != nil {
-		return errors.Wrap(err, "failed to set field `record`")
+		return errors.Wrap(err, "failed to set field `account_id`")
 	}
 	if err := data.Set("zone", record.Zone); err != nil {
-		return errors.Wrap(err, "failed to set field `record`")
+		return errors.Wrap(err, "failed to set field `zone`")
 	}
 	if err := data.Set("editable", record.Editable); err != nil {
-		return errors.Wrap(err, "failed to set field `record`")
+		return errors.Wrap(err, "failed to set field `editable`")
 	}
 	return nil
 }

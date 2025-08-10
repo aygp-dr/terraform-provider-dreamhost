@@ -8,7 +8,7 @@ description: |-
 
 # dreamhost Provider
 
-The Dreamhost provider is used to mange Dreamhost DNS records. Users can create, delete and import DNS records using this provider.
+The Dreamhost provider is used to manage Dreamhost DNS records. Users can create, delete and import DNS records using this provider.
 
 The DNS record resources are considered immutable, so any changes in their settings replaces them (delete and create).
 

@@ -14,9 +14,9 @@ The `dreamhost_dns_record` resource allows you to manage Dreamhost DNS records.
 
 ```terraform
 resource "dreamhost_dns_record" "test" {
-  name  = "test.example.com"
-  value = "1.2.3.4"
-  type  = "A"
+  record = "test.example.com"
+  value  = "1.2.3.4"
+  type   = "A"
 }
 ```
 

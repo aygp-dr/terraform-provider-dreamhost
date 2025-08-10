@@ -28,3 +28,9 @@ func (c *cache) GetRecords(ctx context.Context, client *cachedDreamhostClient) (
 
 	return c.cachedRecords, nil
 }
+
+func (c *cache) Invalidate() {
+	c.Lock()
+	defer c.Unlock()
+	c.cachedRecords = nil
+}
