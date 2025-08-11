@@ -1,7 +1,9 @@
 # Terraform Provider for DreamHost
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/aygp-dr/terraform-provider-dreamhost)](https://goreportcard.com/report/github.com/aygp-dr/terraform-provider-dreamhost)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/aygp-dr/terraform-provider-dreamhost)](https://go.dev/)
+[![Terraform Version](https://img.shields.io/badge/Terraform-%3E%3D1.0-623CE4?logo=terraform)](https://www.terraform.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/aygp-dr/terraform-provider-dreamhost/graphs/commit-activity)
 
 The DreamHost Terraform Provider enables Infrastructure as Code management of DreamHost DNS records.
 
