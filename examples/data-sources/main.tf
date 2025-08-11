@@ -55,7 +55,7 @@ data "dreamhost_dns_records" "zone_records" {
 # List records matching a value pattern
 data "dreamhost_dns_records" "ip_records" {
   filter {
-    value = "192.0.2"  # Will match any record with value containing "192.0.2"
+    value = "192.0.2" # Will match any record with value containing "192.0.2"
   }
 }
 

@@ -1,92 +1,60 @@
-terraform {
-  required_version = ">= 1.0"
-  required_providers {
-    dreamhost = {
-      source  = "aygp-dr/dreamhost"
-      version = "~> 0.1.0"
-    }
-  }
-}
+# This file demonstrates a complete DNS configuration for a domain
+# Split into versions.tf, variables.tf, main.tf, and outputs.tf for better organization
 
 # Configure the DreamHost Provider
-# The API key can also be set via DREAMHOST_API_KEY environment variable
 provider "dreamhost" {
-  # api_key = var.dreamhost_api_key
+  # API key sourced from environment variable DREAMHOST_API_KEY
 }
 
-# Variables for configuration
-variable "domain_name" {
-  description = "The domain name to manage DNS records for"
-  type        = string
-  default     = "example.com"
-}
-
-variable "subdomain" {
-  description = "Subdomain prefix"
-  type        = string
-  default     = "www"
-}
-
-# Create an A record for the root domain
+# Root domain A record
 resource "dreamhost_dns_record" "root_a" {
   record = var.domain_name
   type   = "A"
-  value  = "192.0.2.1"
+  value  = var.ipv4_address
 }
 
-# Create a www subdomain pointing to the root domain
+# WWW subdomain CNAME record
 resource "dreamhost_dns_record" "www_cname" {
   record = "${var.subdomain}.${var.domain_name}"
   type   = "CNAME"
   value  = var.domain_name
 }
 
-# Create an MX record for email
-resource "dreamhost_dns_record" "mx_primary" {
+# MX records for email (using dynamic blocks for multiple servers)
+resource "dreamhost_dns_record" "mx" {
+  for_each = { for idx, mx in var.mail_servers : idx => mx }
+
   record = var.domain_name
   type   = "MX"
-  value  = "10 mail.${var.domain_name}"
+  value  = "${each.value.priority} ${each.value.server}"
 }
 
-resource "dreamhost_dns_record" "mx_secondary" {
-  record = var.domain_name
-  type   = "MX"
-  value  = "20 mail2.${var.domain_name}"
-}
-
-# Create a TXT record for SPF
+# SPF record for email authentication
 resource "dreamhost_dns_record" "spf" {
   record = var.domain_name
   type   = "TXT"
-  value  = "v=spf1 include:_spf.dreamhost.com ~all"
+  value  = var.spf_record
 }
 
-# Create a TXT record for domain verification
+# Domain verification TXT record
 resource "dreamhost_dns_record" "verification" {
   record = "_verification.${var.domain_name}"
   type   = "TXT"
-  value  = "example-verification-token-replace-me"
+  value  = var.verification_token
 }
 
-# Create an SRV record for a service
-resource "dreamhost_dns_record" "srv_example" {
-  record = "_sip._tcp.${var.domain_name}"
+# SRV records for services
+resource "dreamhost_dns_record" "srv" {
+  for_each = var.srv_records
+
+  record = "_${split("_", each.key)[0]}._${split("_", each.key)[1]}.${var.domain_name}"
   type   = "SRV"
-  value  = "10 60 5060 sipserver.${var.domain_name}"
+  value  = "${each.value.priority} ${each.value.weight} ${each.value.port} ${each.value.target}"
 }
 
-# Create AAAA record for IPv6
+# IPv6 AAAA record
 resource "dreamhost_dns_record" "ipv6" {
   record = var.domain_name
   type   = "AAAA"
-  value  = "2001:db8::1"
-}
-
-# Output the created records
-output "root_domain_a_record" {
-  value = dreamhost_dns_record.root_a.value
-}
-
-output "www_cname_record" {
-  value = dreamhost_dns_record.www_cname.value
+  value  = var.ipv6_address
 }
