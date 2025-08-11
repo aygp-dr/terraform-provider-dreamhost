@@ -1,8 +1,9 @@
 terraform {
+  required_version = ">= 1.0"
   required_providers {
     dreamhost = {
-      version = "0.0.1"
-      source  = "hashicorp.com/edu/dreamhost"
+      source  = "aygp-dr/dreamhost"
+      version = "~> 0.1.0"
     }
   }
 }
