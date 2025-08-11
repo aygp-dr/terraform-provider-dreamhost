@@ -8,5 +8,5 @@ terraform {
 }
 
 provider "dreamhost" {
-  api_key = ""
+  # api_key = var.dreamhost_api_key
 }

@@ -64,7 +64,7 @@ resource "dreamhost_dns_record" "spf" {
 resource "dreamhost_dns_record" "verification" {
   record = "_verification.${var.domain_name}"
   type   = "TXT"
-  value  = "verification-token-12345"
+  value  = "example-verification-token-replace-me"
 }
 
 # Create an SRV record for a service
