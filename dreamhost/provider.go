@@ -59,7 +59,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Unable to create Dreamhost client",
-			Detail:   "Unable to create Dreamhost client",
+			Detail:   "Failed to initialize Dreamhost API client: " + err.Error(),
 		})
 
 		return nil, diags

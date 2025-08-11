@@ -8,13 +8,18 @@ import (
 	"github.com/pkg/errors"
 )
 
+// DNSRecordLister interface to avoid circular dependency
+type DNSRecordLister interface {
+	ListDNSRecords(ctx context.Context) ([]dreamhostapi.DNSRecord, error)
+}
+
 type cache struct {
 	sync.Mutex
 
 	cachedRecords []dreamhostapi.DNSRecord
 }
 
-func (c *cache) GetRecords(ctx context.Context, client *cachedDreamhostClient) ([]dreamhostapi.DNSRecord, error) {
+func (c *cache) GetRecords(ctx context.Context, client DNSRecordLister) ([]dreamhostapi.DNSRecord, error) {
 	c.Lock()
 	defer c.Unlock()
 
@@ -26,7 +31,10 @@ func (c *cache) GetRecords(ctx context.Context, client *cachedDreamhostClient) (
 		c.cachedRecords = records
 	}
 
-	return c.cachedRecords, nil
+	// Return a copy to prevent external modification
+	result := make([]dreamhostapi.DNSRecord, len(c.cachedRecords))
+	copy(result, c.cachedRecords)
+	return result, nil
 }
 
 func (c *cache) Invalidate() {

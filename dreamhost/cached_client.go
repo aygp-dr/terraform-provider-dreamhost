@@ -34,12 +34,13 @@ func (c *cachedDreamhostClient) GetDNSRecord(
 		if err != nil {
 			return nil, err
 		}
-		for _, record := range records {
-			if record.Record == recordInput.Record &&
-				record.Type == recordInput.Type &&
-				(record.Value == recordInput.Value || record.Value+"." == recordInput.Value) {
-				// record found
-				return &record, nil
+		for i := range records {
+			if records[i].Record == recordInput.Record &&
+				records[i].Type == recordInput.Type &&
+				(records[i].Value == recordInput.Value || records[i].Value+"." == recordInput.Value) {
+				// record found - return a copy to avoid issues
+				recordCopy := records[i]
+				return &recordCopy, nil
 			}
 		}
 		return nil, nil

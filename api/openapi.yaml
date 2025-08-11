@@ -1,0 +1,256 @@
+openapi: 3.0.3
+info:
+  title: DreamHost DNS API
+  description: OpenAPI specification for DreamHost DNS management API
+  version: 1.0.0
+  contact:
+    name: DreamHost Support
+    url: https://help.dreamhost.com
+
+servers:
+  - url: https://api.dreamhost.com
+    description: Production API server
+
+paths:
+  /:
+    get:
+      summary: Execute API Command
+      description: All DreamHost API commands are executed via GET requests with query parameters
+      parameters:
+        - name: key
+          in: query
+          required: true
+          description: API authentication key
+          schema:
+            type: string
+            example: "1A2B3C4D5E6F7G8H"
+        - name: cmd
+          in: query
+          required: true
+          description: API command to execute
+          schema:
+            type: string
+            enum:
+              - dns-list_records
+              - dns-add_record
+              - dns-remove_record
+        - name: format
+          in: query
+          required: false
+          description: Response format
+          schema:
+            type: string
+            enum:
+              - json
+              - xml
+              - tab
+            default: json
+        - name: record
+          in: query
+          required: false
+          description: DNS record name (required for add/remove operations)
+          schema:
+            type: string
+            example: "example.com"
+        - name: type
+          in: query
+          required: false
+          description: DNS record type (required for add/remove operations)
+          schema:
+            type: string
+            enum:
+              - A
+              - AAAA
+              - CNAME
+              - MX
+              - NS
+              - PTR
+              - TXT
+              - SRV
+              - NAPTR
+        - name: value
+          in: query
+          required: false
+          description: DNS record value (required for add/remove operations)
+          schema:
+            type: string
+            example: "192.0.2.1"
+        - name: unique_id
+          in: query
+          required: false
+          description: Unique identifier for the request (optional)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ListRecordsResponse'
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    DNSRecord:
+      type: object
+      required:
+        - record
+        - type
+        - value
+      properties:
+        record:
+          type: string
+          description: The DNS record name
+          example: "example.com"
+        type:
+          type: string
+          description: The DNS record type
+          enum:
+            - A
+            - AAAA
+            - CNAME
+            - MX
+            - NS
+            - PTR
+            - TXT
+            - SRV
+            - NAPTR
+          example: "A"
+        value:
+          type: string
+          description: The DNS record value
+          example: "192.0.2.1"
+        zone:
+          type: string
+          description: The DNS zone
+          example: "example.com"
+        account_id:
+          type: string
+          description: Account ID for the record
+          example: "123456"
+        comment:
+          type: string
+          description: Comment associated with the record
+          example: "Main website"
+        editable:
+          type: string
+          description: Whether the record is editable (0 or 1)
+          enum:
+            - "0"
+            - "1"
+          example: "1"
+
+    ListRecordsResponse:
+      type: object
+      required:
+        - result
+        - data
+      properties:
+        result:
+          type: string
+          enum:
+            - success
+          example: "success"
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/DNSRecord'
+
+    SuccessResponse:
+      type: object
+      required:
+        - result
+        - data
+      properties:
+        result:
+          type: string
+          enum:
+            - success
+          example: "success"
+        data:
+          type: string
+          description: Success message
+          example: "DNS record added successfully"
+
+    ErrorResponse:
+      type: object
+      required:
+        - result
+        - data
+      properties:
+        result:
+          type: string
+          enum:
+            - error
+          example: "error"
+        data:
+          type: string
+          description: Error message
+          example: "Invalid API key"
+
+    DNSRecordInput:
+      type: object
+      required:
+        - record
+        - type
+        - value
+      properties:
+        record:
+          type: string
+          description: DNS record name
+          example: "example.com"
+        type:
+          type: string
+          description: DNS record type
+          enum:
+            - A
+            - AAAA
+            - CNAME
+            - MX
+            - NS
+            - PTR
+            - TXT
+            - SRV
+            - NAPTR
+        value:
+          type: string
+          description: DNS record value
+          example: "192.0.2.1"
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: query
+      name: key
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: DNS
+    description: DNS record management operations
+
+externalDocs:
+  description: DreamHost API Documentation
+  url: https://help.dreamhost.com/hc/en-us/articles/217555707-DNS-API-commands
