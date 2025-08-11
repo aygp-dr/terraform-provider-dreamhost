@@ -27,7 +27,10 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"dreamhost_dns_record": resourceDNSRecord(),
 		},
-		DataSourcesMap:       map[string]*schema.Resource{},
+		DataSourcesMap: map[string]*schema.Resource{
+			"dreamhost_dns_record":  dataSourceDNSRecord(),
+			"dreamhost_dns_records": dataSourceDNSRecords(),
+		},
 		ConfigureContextFunc: providerConfigure,
 	}
 }

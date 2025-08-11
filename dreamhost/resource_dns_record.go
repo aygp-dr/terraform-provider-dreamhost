@@ -105,14 +105,18 @@ func resourceDNSRecordCreate(ctx context.Context, data *schema.ResourceData, con
 		Type:   dreamhostapi.RecordType(typ),
 	}
 
-	err := api.AddDNSRecord(ctx, recordInput)
+	// Add record with retry
+	err := retryOnError(ctx, func() error {
+		return api.AddDNSRecord(ctx, recordInput)
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	data.SetId(recordInputToID(recordInput))
 
-	dnsRecord, err := api.GetDNSRecord(ctx, recordInput, false)
+	// Wait for record to be available
+	dnsRecord, err := waitForDNSRecord(ctx, api, recordInput)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -201,9 +205,23 @@ func resourceDNSRecordDelete(ctx context.Context, data *schema.ResourceData, con
 		return diag.FromErr(err)
 	}
 
-	err = api.RemoveDNSRecord(ctx, *recordInput)
+	// Remove record with retry
+	err = retryOnError(ctx, func() error {
+		return api.RemoveDNSRecord(ctx, *recordInput)
+	})
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	// Wait for record to be deleted
+	err = waitForDNSRecordDeletion(ctx, api, *recordInput)
+	if err != nil {
+		// Log but don't fail if we can't confirm deletion
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "Could not confirm DNS record deletion",
+			Detail:   err.Error(),
+		})
 	}
 
 	// d.SetId("") is automatically called assuming delete returns no errors, but
